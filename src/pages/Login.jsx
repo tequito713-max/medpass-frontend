@@ -1,6 +1,32 @@
+import { useState } from 'react'
 import { UserRound, Lock, Mail, HeartPulse } from 'lucide-react'
+import { loginUsuario } from '../services/api.js'
 
 function Login({ onLogin }) {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [cargando, setCargando] = useState(false)
+  const [error, setError] = useState('')
+
+  async function manejarSubmit(e) {
+    e.preventDefault()
+    setError('')
+    setCargando(true)
+
+    try {
+      const data = await loginUsuario(email, password)
+
+      localStorage.setItem('token', data.token)
+      localStorage.setItem('usuario', JSON.stringify(data.usuario))
+
+      onLogin(data.usuario)
+    } catch (err) {
+      setError(err.message || 'No se pudo iniciar sesión')
+    } finally {
+      setCargando(false)
+    }
+  }
+
   return (
     <main className="login-page">
       <section className="login-container">
@@ -13,18 +39,29 @@ function Login({ onLogin }) {
           <p>Acceso seguro a tu historial médico digital</p>
         </div>
 
-        <form className="login-card">
+        <form className="login-card" onSubmit={manejarSubmit}>
           <div className="login-header">
             <UserRound size={34} />
             <h2>Iniciar sesión</h2>
             <p>Ingresa tus datos para continuar</p>
           </div>
 
+          {error && (
+            <div className="error-box">
+              {error}
+            </div>
+          )}
+
           <div className="form-group">
-            <label>Correo o usuario</label>
+            <label>Correo</label>
             <div className="input-box">
               <Mail size={20} />
-              <input type="text" placeholder="ejemplo@correo.com" />
+              <input
+                type="email"
+                placeholder="ejemplo@correo.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
             </div>
           </div>
 
@@ -32,20 +69,21 @@ function Login({ onLogin }) {
             <label>Contraseña</label>
             <div className="input-box">
               <Lock size={20} />
-              <input type="password" placeholder="Ingresa tu contraseña" />
+              <input
+                type="password"
+                placeholder="Ingresa tu contraseña"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
             </div>
           </div>
 
-          <a href="#" className="forgot-link">
-            ¿Olvidaste tu contraseña?
-          </a>
-
-          <button type="button" className="login-button" onClick={onLogin}>
-            Login
+          <button type="submit" className="login-button" disabled={cargando}>
+            {cargando ? 'Entrando...' : 'Login'}
           </button>
 
           <p className="register-text">
-            ¿No estás dado de alta? <a href="#">Regístrate aquí</a>
+            Sistema médico conectado a base de datos MEDPASS
           </p>
         </form>
       </section>
