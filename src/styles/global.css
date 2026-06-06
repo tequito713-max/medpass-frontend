@@ -179,7 +179,7 @@ button {
   font-size: 14px;
 }
 
-/* GENERAL */
+/* General */
 
 .dashboard-page,
 .profile-page {
@@ -796,7 +796,8 @@ button {
 }
 
 .btn-editar-consulta {
-  margin-left: auto;
+  margin-left: 8px;
+  margin-right: 80px;
   align-self: flex-start;
   display: flex;
   align-items: center;
@@ -902,4 +903,321 @@ button {
   padding: 12px 18px;
   font-weight: bold;
   cursor: pointer;
+}
+
+.card-title-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card-title-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.medical-row-editable {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.medical-info {
+  flex: 1;
+}
+
+.btn-editar-alergia {
+  border: none;
+  background: #eff6ff;
+  color: #2563eb;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-editar-alergia:hover {
+  background: #dbeafe;
+}
+
+.btn-agregar-alergia {
+  border: none;
+  background: #2563eb;
+  color: white;
+  padding: 9px 14px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-agregar-alergia:hover {
+  background: #1d4ed8;
+}
+
+.btn-agregar-alergia svg {
+  color: white;
+}
+
+.formulario-alergia {
+  margin-top: 18px;
+  padding: 16px;
+  border: 1px solid #dbeafe;
+  border-radius: 18px;
+  background: #f8fbff;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.formulario-alergia h4 {
+  margin: 0 0 6px 0;
+  color: #0f172a;
+}
+
+.formulario-alergia label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #334155;
+}
+
+.formulario-alergia input,
+.formulario-alergia select {
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 10px 12px;
+  outline: none;
+  font-size: 14px;
+  background: white;
+  color: #172033;
+}
+
+.acciones-form-alergia {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.btn-cancelar-alergia,
+.btn-borrar-alergia,
+.btn-guardar-alergia {
+  flex: 1;
+  padding: 10px;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-cancelar-alergia {
+  border: 1px solid #cbd5e1;
+  background: white;
+  color: #334155;
+}
+
+.btn-borrar-alergia {
+  border: none;
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.btn-guardar-alergia {
+  border: none;
+  background: #2563eb;
+  color: white;
+}
+
+
+.receta-grupo {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+
+
+.medicamento-receta {
+  border-top: 1px solid #dbe4f0;
+  padding-top: 12px;
+}
+
+.medicamento-receta:first-of-type {
+  border-top: none;
+  padding-top: 0;
+}
+
+.medicamento-receta h4 {
+  margin: 0 0 6px 0;
+  color: #0f172a;
+  font-size: 15px;
+}
+
+
+
+.estudio-record {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.estudio-record-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.estudio-record-header div {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.badge-estado {
+  width: fit-content;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.estado-pendiente {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.estado-realizado {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.estudio-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.btn-ver-detalles,
+.btn-editar-estudio {
+  border: none;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-ver-detalles {
+  background: #f1f5f9;
+  color: #334155;
+}
+
+.btn-ver-detalles:hover {
+  background: #e2e8f0;
+}
+
+.btn-editar-estudio {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.btn-editar-estudio:hover {
+  background: #dbeafe;
+}
+
+.estudio-detalle {
+  margin-top: 10px;
+  padding: 14px;
+  border-radius: 14px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+}
+
+.estudio-detalle p {
+  margin: 5px 0;
+  color: #475569;
+  font-size: 14px;
+}
+
+/* FORMULARIO PARA EDITAR RESULTADO DE ESTUDIO */
+
+.formulario-editar-resultado {
+  margin-top: 14px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: #f8fbff;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.formulario-editar-resultado h4 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.formulario-editar-resultado label {
+  font-size: 14px;
+  font-weight: 700;
+  color: #334155;
+}
+
+.formulario-editar-resultado textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 12px 14px;
+  border: 1px solid #bfdbfe;
+  border-radius: 14px;
+  background: white;
+  color: #0f172a;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+  outline: none;
+}
+
+.formulario-editar-resultado textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
+}
+
+.acciones-editar-resultado {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.btn-guardar-resultado {
+  border: none;
+  background: var(--primary);
+  color: white;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.btn-guardar-resultado:hover {
+  background: var(--primary-dark);
+}
+
+.btn-cancelar-resultado {
+  border: none;
+  background: #f1f5f9;
+  color: #334155;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.btn-cancelar-resultado:hover {
+  background: #e2e8f0;
 }

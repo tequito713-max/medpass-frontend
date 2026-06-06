@@ -150,6 +150,48 @@
   cursor: not-allowed;
 }
 
+.receta-item {
+  border: 1px solid #dbe4f0;
+  border-radius: 14px;
+  padding: 18px;
+  margin-bottom: 18px;
+  background: #ffffff;
+}
+
+.titulo-receta-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.titulo-receta-item h4 {
+  margin: 0;
+  color: #172033;
+  font-size: 17px;
+}
+
+.btn-agregar-medicamento {
+  border: none;
+  background-color: #2563eb;
+  color: white;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-eliminar-medicamento {
+  border: none;
+  background-color: #fee2e2;
+  color: #b91c1c;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
 @media (max-width: 700px) {
   .grid-form {
     grid-template-columns: 1fr;

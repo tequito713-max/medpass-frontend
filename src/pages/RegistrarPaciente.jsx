@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { crearPaciente } from "../services/api.js";
+import { crearPacienteConCuenta } from "../services/api.js";
 
 export default function RegistrarPaciente({ onPacienteRegistrado, onBack }) {
   const [form, setForm] = useState({
@@ -9,6 +9,7 @@ export default function RegistrarPaciente({ onPacienteRegistrado, onBack }) {
     tipoSangre: "",
     telefono: "",
     email: "",
+    password: "",
   });
 
   const [mensaje, setMensaje] = useState("");
@@ -34,9 +35,10 @@ export default function RegistrarPaciente({ onPacienteRegistrado, onBack }) {
         tipoSangre: form.tipoSangre,
         telefono: form.telefono,
         email: form.email,
+        password: form.password,
       };
 
-      const pacienteCreado = await crearPaciente(nuevoPaciente);
+      const pacienteCreado = await crearPacienteConCuenta(nuevoPaciente);
 
       setMensaje("Paciente registrado correctamente");
       onPacienteRegistrado(pacienteCreado);
@@ -120,6 +122,15 @@ export default function RegistrarPaciente({ onPacienteRegistrado, onBack }) {
               name="email"
               value={form.email}
               onChange={manejarCambio}
+            />
+
+            <label>Contraseña temporal</label>
+            <input
+              type="password"
+              name="password"
+              value={form.password}
+              onChange={manejarCambio}
+              required
             />
 
             <button type="submit" disabled={cargando}>

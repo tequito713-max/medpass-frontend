@@ -1,89 +1,191 @@
+import axios from 'axios'
+//const API_URL = 'https://d35t58c2fgfu9s.cloudfront.net/v1'
 const API_URL = 'https://localhost:7121/v1'
+const api = axios.create({
+  baseURL: API_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+})
 
-export async function apiRequest(endpoint, options = {}) {
+api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token')
 
-  let response
+  const esLogin = config.url === '/Auth/login'
+  const esMfa = config.url === '/Auth/verificar-mfa'
 
-  try {
-    response = await fetch(`${API_URL}${endpoint}`, {
-      ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        ...options.headers,
-      },
-    })
-  } catch (error) {
-    throw new Error('No se pudo conectar con el backend')
+  if (token && !esLogin && !esMfa) {
+    config.headers.Authorization = `Bearer ${token}`
   }
 
-  const texto = await response.text()
+  return config
+})
 
-  let data = null
+function manejarError(error) {
+  const mensaje =
+    error.response?.data?.mensaje ||
+    error.response?.data?.message ||
+    error.response?.data ||
+    error.message ||
+    'Ocurrió un error'
 
-  if (texto) {
-    try {
-      data = JSON.parse(texto)
-    } catch {
-      data = texto
-    }
-  }
-
-  if (!response.ok) {
-    const mensaje =
-      data?.mensaje ||
-      data?.message ||
-      (typeof data === 'string' ? data : null) ||
-      `Error ${response.status}`
-
-    throw new Error(mensaje)
-  }
-
-  return data
+  throw new Error(mensaje)
 }
 
-export function loginUsuario(email, password) {
-  return apiRequest('/Auth/login', {
-    method: 'POST',
-    body: JSON.stringify({
+export async function loginUsuario(email, password) {
+  try {
+    const response = await api.post('/Auth/login', {
       email,
       password,
-    }),
-  })
+    })
+
+    return response.data
+  } catch (error) {
+    manejarError(error)
+  }
 }
 
-export function obtenerPacientes() {
-  return apiRequest('/Pacientes')
+export async function verificarMfa(usuarioId, codigo) {
+  try {
+    const response = await api.post('/Auth/verificar-mfa', {
+      usuarioId,
+      codigo,
+    })
+
+    return response.data
+  } catch (error) {
+    manejarError(error)
+  }
 }
 
-export function obtenerAlergias() {
-  return apiRequest('/Alergias')
+export async function obtenerPacientes() {
+  try {
+    const response = await api.get('/Pacientes')
+    return response.data
+  } catch (error) {
+    manejarError(error)
+  }
 }
 
-export function obtenerConsultas() {
-  return apiRequest('/Consultas')
+export async function obtenerPacientePorId(id) {
+  try {
+    const response = await api.get(`/Pacientes/${id}`)
+    return response.data
+  } catch (error) {
+    manejarError(error)
+  }
 }
 
-export function obtenerRecetas() {
-  return apiRequest('/Recetas')
+export async function obtenerAlergias() {
+  try {
+    const response = await api.get('/Alergias')
+    return response.data
+  } catch (error) {
+    manejarError(error)
+  }
 }
 
-export function obtenerEstudios() {
-  return apiRequest('/Estudios')
+export async function obtenerConsultas() {
+  try {
+    const response = await api.get('/Consultas')
+    return response.data
+  } catch (error) {
+    manejarError(error)
+  }
 }
 
-export function obtenerMedicos() {
-  return apiRequest('/Medicos')
+export async function obtenerRecetas() {
+  try {
+    const response = await api.get('/Recetas')
+    return response.data
+  } catch (error) {
+    manejarError(error)
+  }
 }
 
-export function obtenerClinicas() {
-  return apiRequest('/Clinicas')
+export async function actualizarEstudio(id, datos) {
+  try {
+    const response = await api.patch(`/Estudios/${id}`, datos)
+    return response.data
+  } catch (error) {
+    manejarError(error)
+  }
 }
 
-export function crearPaciente(paciente) {
-  return apiRequest('/Pacientes', {
-    method: 'POST',
-    body: JSON.stringify(paciente),
-  })
+export async function obtenerEstudios() {
+  try {
+    const response = await api.get('/Estudios')
+    return response.data
+  } catch (error) {
+    manejarError(error)
+  }
 }
+
+export async function obtenerMedicos() {
+  try {
+    const response = await api.get('/Medicos')
+    return response.data
+  } catch (error) {
+    manejarError(error)
+  }
+}
+
+export async function obtenerClinicas() {
+  try {
+    const response = await api.get('/Clinicas')
+    return response.data
+  } catch (error) {
+    manejarError(error)
+  }
+}
+
+export async function crearPaciente(paciente) {
+  try {
+    const response = await api.post('/Pacientes', paciente)
+    return response.data
+  } catch (error) {
+    manejarError(error)
+  }
+}
+
+export async function crearAlergia(alergia) {
+  try {
+    const response = await api.post('/Alergias', alergia)
+    return response.data
+  } catch (error) {
+    manejarError(error)
+  }
+}
+
+export async function editarAlergia(id, alergia) {
+  try {
+    const response = await api.patch(`/Alergias/${id}`, alergia)
+    return response.data
+  } catch (error) {
+    manejarError(error)
+  }
+}
+
+export async function borrarAlergia(id) {
+  try {
+    const response = await api.delete(`/Alergias/${id}`)
+    return response.data
+  } catch (error) {
+    manejarError(error)
+  }
+}
+
+export async function crearPacienteConCuenta(datos) {
+  try {
+    const response = await api.post("/Auth/registrar-paciente", datos);
+    return response.data;
+  } catch (error) {
+    manejarError(error);
+  }
+}
+
+
+
+
+
+export default api

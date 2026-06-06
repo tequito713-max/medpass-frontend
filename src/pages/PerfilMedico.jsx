@@ -27,9 +27,14 @@ import {
   obtenerEstudios,
   obtenerMedicos,
   obtenerClinicas,
+  crearAlergia,
+  editarAlergia,
+  borrarAlergia,
+  actualizarEstudio,
 } from '../services/api.js'
 
 import FormularioAtencion from '../componets/FormularioAtencion.jsx'
+
 
 function PerfilMedico({ paciente, onBack, onCerrarSesion }) {
   const [consultas, setConsultas] = useState([])
@@ -42,8 +47,21 @@ function PerfilMedico({ paciente, onBack, onCerrarSesion }) {
   const [error, setError] = useState('')
   const [mostrarFormulario, setMostrarFormulario] = useState(false)
   const [consultaEditar, setConsultaEditar] = useState(null)
-
+  const [mostrarFormularioAlergia, setMostrarFormularioAlergia] = useState(false)
+  const [guardandoAlergia, setGuardandoAlergia] = useState(false)
+  const [nuevaAlergia, setNuevaAlergia] = useState({
+    sustancia: '',
+    reaccion: '',
+    severidad: 'Baja',
+  }) 
+  const [alergiaEditar, setAlergiaEditar] = useState(null)
   const usuario = JSON.parse(localStorage.getItem('usuario'))
+  
+  const [estudioEditandoId, setEstudioEditandoId] = useState(null)
+  const [resultadoEditado, setResultadoEditado] = useState('')
+  const [estudioDetalleId, setEstudioDetalleId] = useState(null)
+  const [guardandoResultado, setGuardandoResultado] = useState(false)  
+
 
   useEffect(() => {
     if (paciente?.id) {
@@ -78,7 +96,7 @@ function PerfilMedico({ paciente, onBack, onCerrarSesion }) {
 
       const idsConsultasPaciente = consultasPaciente.map(
         (consulta) => consulta.id
-      )
+      )  
 
       const recetasPaciente = recetasData.filter((receta) =>
         idsConsultasPaciente.includes(receta.consultaId)
@@ -91,6 +109,8 @@ function PerfilMedico({ paciente, onBack, onCerrarSesion }) {
       const estudiosPaciente = estudiosData.filter(
         (estudio) => estudio.pacienteId === paciente.id
       )
+
+
 
       setConsultas(consultasPaciente)
       setAlergias(alergiasPaciente)
@@ -106,17 +126,133 @@ function PerfilMedico({ paciente, onBack, onCerrarSesion }) {
   }
 
   function buscarMedico(id) {
-    return medicos.find((medico) => medico.id === id)
+    return medicos.find((medico) => String(medico.id) === String(id))
   }
 
   function buscarClinica(id) {
-    return clinicas.find((clinica) => clinica.id === id)
+    return clinicas.find((clinica) => String(clinica.id) === String(id))
   }
 
   function cerrarFormularioYActualizar() {
     setMostrarFormulario(false)
     setConsultaEditar(null)
     cargarHistorial()
+  }
+  async function guardarAlergia(e) {
+    e.preventDefault()
+
+    if (!nuevaAlergia.sustancia.trim()) {
+      
+      return
+    }
+
+    if (!nuevaAlergia.reaccion.trim()) {
+      
+      return
+    }
+
+    try {
+      setGuardandoAlergia(true)
+
+      const alergiaEnviar = {
+        sustancia: nuevaAlergia.sustancia,
+        reaccion: nuevaAlergia.reaccion,
+        severidad: nuevaAlergia.severidad,
+        pacienteId: paciente.id,
+      }
+
+      if (alergiaEditar) {
+        await editarAlergia(alergiaEditar.id, {
+          id: alergiaEditar.id,
+          ...alergiaEnviar,
+        })
+      } else {
+        await crearAlergia(alergiaEnviar)
+      }
+
+      setNuevaAlergia({
+        sustancia: '',
+        reaccion: '',
+        severidad: 'Baja',
+      })
+
+      setAlergiaEditar(null)
+      setMostrarFormularioAlergia(false)
+      cargarHistorial()
+    } catch (error) {
+      alert(error.message || 'No se pudo guardar la alergia')
+    } finally {
+      setGuardandoAlergia(false)
+    }
+  }
+
+  async function eliminarAlergia() {
+    if (!alergiaEditar) return
+
+    const confirmar = confirm('¿Seguro que quieres borrar esta alergia?')
+
+    if (!confirmar) return
+
+    try {
+      await borrarAlergia(alergiaEditar.id)
+
+      setNuevaAlergia({
+        sustancia: '',
+        reaccion: '',
+        severidad: 'Baja',
+      })
+
+      setAlergiaEditar(null)
+      setMostrarFormularioAlergia(false)
+      cargarHistorial()
+    } catch (error) {
+      alert(error.message || 'No se pudo borrar la alergia')
+    }
+  }
+
+  function abrirEditarAlergia(alergia) {
+    setAlergiaEditar(alergia)
+
+    setNuevaAlergia({
+      sustancia: alergia.sustancia || '',
+      reaccion: alergia.reaccion || '',
+      severidad: alergia.severidad || 'Baja',
+    })
+
+    setMostrarFormularioAlergia(true)
+  }
+
+  async function guardarResultadoEstudio(id) {
+    if (!resultadoEditado.trim()) {
+      alert('Escribe el resultado del estudio')
+      return
+    }
+
+    const estudioActual = estudios.find(
+      (estudio) => String(estudio.id) === String(id)
+    )
+
+    if (!estudioActual) {
+      alert('No se encontró el estudio')
+      return
+    }
+
+    try {
+      setGuardandoResultado(true)
+
+      await actualizarEstudio(id, {
+        ...estudioActual,
+        resultado: resultadoEditado,
+      })
+
+      setEstudioEditandoId(null)
+      setResultadoEditado('')
+      cargarHistorial()
+    } catch (error) {
+      alert(error.message || 'No se pudo actualizar el resultado del estudio')
+    } finally {
+      setGuardandoResultado(false)
+    }
   }
 
   return (
@@ -171,14 +307,15 @@ function PerfilMedico({ paciente, onBack, onCerrarSesion }) {
       </section>
 
       <section className="summary-cards">
-        <div className="mini-card">
-          <Stethoscope size={24} />
-          <strong>{consultas.length}</strong>
-          <span>Consultas</span>
-        </div>
 
         <div className="mini-card">
-          <AlertTriangle size={24} />
+            <ShieldCheck size={24} />
+            <strong>{consultas.length}</strong>
+            <span>Consultas</span>
+          </div>
+
+        <div className="mini-card">
+          <ShieldCheck size={24} />
           <strong>{alergias.length}</strong>
           <span>Alergias</span>
         </div>
@@ -226,30 +363,148 @@ function PerfilMedico({ paciente, onBack, onCerrarSesion }) {
             </div>
           </div>
 
-          <div className="card medical-summary">
-            <div className="card-title">
-              <ShieldCheck size={24} />
-              <h3>Alergias</h3>
+         <div className="card medical-summary">
+            <div className="card-title card-title-between">
+              <div className="card-title-left">
+                <ShieldCheck size={24} />
+                <h3>Alergias</h3>
+              </div>
+
+              {usuario?.rol === 'Medico' && (
+                <button
+                  type="button"
+                  className="btn-agregar-alergia"
+                  onClick={() => {
+                    setAlergiaEditar(null)
+                    setNuevaAlergia({
+                      sustancia: '',
+                      reaccion: '',
+                      severidad: 'Baja',
+                    })
+                    setMostrarFormularioAlergia(true)
+                  }}
+                >
+                  <PlusCircle size={16} />
+                  Agregar
+                </button>
+              )}
             </div>
 
             {alergias.length > 0 ? (
               <div className="vertical-list">
                 {alergias.map((alergia) => (
-                  <div className="medical-row" key={alergia.id}>
+                  <div className="medical-row medical-row-editable" key={alergia.id}>
                     <div className="medical-icon danger">
                       <AlertTriangle size={22} />
                     </div>
 
-                    <div>
+                    <div className="medical-info">
                       <span>{alergia.sustancia}</span>
                       <strong>{alergia.reaccion}</strong>
                       <p>Severidad: {alergia.severidad}</p>
                     </div>
+
+                    {usuario?.rol === 'Medico' && (
+                      <button
+                        type="button"
+                        className="btn-editar-alergia"
+                        onClick={() => abrirEditarAlergia(alergia)}
+                      >
+                        Editar
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>
             ) : (
               <p className="empty-text">No hay alergias registradas.</p>
+            )}
+
+            {mostrarFormularioAlergia && (
+              <form className="formulario-alergia" onSubmit={guardarAlergia}>
+                <h4>{alergiaEditar ? 'Editar alergia' : 'Nueva alergia'}</h4>
+
+                <label>Sustancia</label>
+                <input
+                  type="text"
+                  placeholder="Ejemplo: Penicilina"
+                  value={nuevaAlergia.sustancia}
+                  onChange={(e) =>
+                    setNuevaAlergia({
+                      ...nuevaAlergia,
+                      sustancia: e.target.value,
+                    })
+                  }
+                />
+
+                <label>Reacción</label>
+                <input
+                  type="text"
+                  placeholder="Ejemplo: Erupción cutánea"
+                  value={nuevaAlergia.reaccion}
+                  onChange={(e) =>
+                    setNuevaAlergia({
+                      ...nuevaAlergia,
+                      reaccion: e.target.value,
+                    })
+                  }
+                />
+
+                <label>Severidad</label>
+                <select
+                  value={nuevaAlergia.severidad}
+                  onChange={(e) =>
+                    setNuevaAlergia({
+                      ...nuevaAlergia,
+                      severidad: e.target.value,
+                    })
+                  }
+                >
+                  <option value="Baja">Baja</option>
+                  <option value="Media">Media</option>
+                  <option value="Alta">Alta</option>
+                </select>
+
+                <div className="acciones-form-alergia">
+                  <button
+                    type="button"
+                    className="btn-cancelar-alergia"
+                    onClick={() => {
+                      setMostrarFormularioAlergia(false)
+                      setAlergiaEditar(null)
+                      setNuevaAlergia({
+                        sustancia: '',
+                        reaccion: '',
+                        severidad: 'Baja',
+                      })
+                    }}
+                  >
+                    Cancelar
+                  </button>
+
+                  {alergiaEditar && (
+                    <button
+                      type="button"
+                      className="btn-borrar-alergia"
+                      onClick={eliminarAlergia}
+                    >
+                      Borrar
+                    </button>
+                  )}
+
+                  <button
+                    type="submit"
+                    className="btn-guardar-alergia"
+                    disabled={guardandoAlergia}
+                  >
+                    {guardandoAlergia
+                      ? 'Guardando...'
+                      : alergiaEditar
+                        ? 'Actualizar alergia'
+                        : 'Guardar alergia'}
+                  </button>
+                </div>
+              </form>
             )}
           </div>
 
@@ -289,13 +544,22 @@ function PerfilMedico({ paciente, onBack, onCerrarSesion }) {
                       </div>
 
                       {usuario?.rol === 'Medico' && (
-                        <button
+                       <button
                           className="btn-editar-consulta"
                           onClick={() => {
-                            setConsultaEditar(consulta)
+                            const recetasDeConsulta = recetas.filter(
+                              (receta) => Number(receta.consultaId) === Number(consulta.id)
+                            )
+
+                            setConsultaEditar({
+                              ...consulta,
+                              recetas: recetasDeConsulta,
+                              estudio: null,
+                            })
+
                             setMostrarFormulario(true)
                           }}
-                        >
+                          >
                           <Pencil size={16} />
                           Editar
                         </button>
@@ -314,19 +578,39 @@ function PerfilMedico({ paciente, onBack, onCerrarSesion }) {
               <Pill size={24} />
               <h3>Recetas</h3>
             </div>
-
+            
             {recetas.length > 0 ? (
               <div className="vertical-list">
-                {recetas.map((receta) => (
-                  <div className="simple-record" key={receta.id}>
-                    <strong>{receta.medicamento}</strong>
-                    <span>Dosis: {receta.dosis}</span>
-                    <p>Duración: {receta.duracion}</p>
-                    {receta.indicaciones && (
-                      <p>Indicaciones: {receta.indicaciones}</p>
-                    )}
-                  </div>
-                ))}
+                {consultas.map((consulta) => {
+                  const recetasDeConsulta = recetas.filter(
+                    (receta) => Number(receta.consultaId) === Number(consulta.id)
+                  )
+
+                  if (recetasDeConsulta.length === 0) {
+                    return null
+                  }
+
+                  return (
+                    <div className="simple-record receta-grupo" key={consulta.id}>
+                      <strong>Receta del {formatearFecha(consulta.fecha)}</strong>
+
+                      {recetasDeConsulta.map((receta, index) => (
+                        <div className="medicamento-receta" key={receta.id}>
+                          <h4>
+                            Medicamento {index + 1}: {receta.medicamento}
+                          </h4>
+
+                          <span>Dosis: {receta.dosis}</span>
+                          <p>Duración: {receta.duracion}</p>
+
+                          {receta.indicaciones && (
+                            <p>Indicaciones: {receta.indicaciones}</p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )
+                })}
               </div>
             ) : (
               <p className="empty-text">No hay recetas registradas.</p>
@@ -343,25 +627,142 @@ function PerfilMedico({ paciente, onBack, onCerrarSesion }) {
               <div className="vertical-list">
                 {estudios.map((estudio) => {
                   const clinica = buscarClinica(estudio.clinicaId)
+                  const estaAbierto = estudioDetalleId === estudio.id
 
                   return (
-                    <div className="simple-record" key={estudio.id}>
-                      <strong>{estudio.tipo}</strong>
-                      <span>{estudio.resultado}</span>
-                      <p>{formatearFecha(estudio.fecha || estudio.fechaSolicitud)}</p>
-                      <p>{clinica?.nombre || estudio.clinicaLaboratorio || 'Clínica no encontrada'}</p>
+                    <div className="simple-record estudio-record" key={estudio.id}>
+                      <div className="estudio-record-header">
+                        <div>
+                          <strong>{estudio.tipo || `Estudio #${estudio.id}`}</strong>
 
-                      {estudio.hospital && (
-                        <p>Hospital: {estudio.hospital}</p>
+                          <span
+                            className={`badge-estado ${
+                              estudio.resultado === 'Pendiente'
+                                ? 'estado-pendiente'
+                                : 'estado-realizado'
+                            }`}
+                          >
+                            {estudio.resultado || 'Pendiente'}
+                          </span>
+                        </div>
+                      </div>
+
+                      <p>
+                        {formatearFecha(estudio.fecha || estudio.fechaSolicitud)}
+                      </p>
+
+                      <p>
+                        {clinica?.nombre ||
+                          estudio.clinicaLaboratorio ||
+                          'Clínica no encontrada'}
+                      </p>
+
+                      <div className="estudio-actions">
+                        <button
+                          type="button"
+                          className="btn-ver-detalles"
+                          onClick={() =>
+                            setEstudioDetalleId(estaAbierto ? null : estudio.id)
+                          }
+                        >
+                          {estaAbierto ? 'Ocultar detalles' : 'Ver detalles'}
+                        </button>
+
+                       {usuario?.rol === 'Medico' && (
+                        <button
+                          type="button"
+                          className="btn-editar-estudio"
+                          onClick={() => {
+                            setEstudioEditandoId(estudio.id)
+                            setResultadoEditado(estudio.resultado || '')
+                          }}
+                        >
+                          Editar resultado
+                        </button>
+                      )}
+                      </div>
+
+                      {estaAbierto && (
+                        <div className="estudio-detalle">
+                          <p>
+                            <strong>Tipo:</strong>{' '}
+                            {estudio.tipo || 'No especificado'}
+                          </p>
+
+                          <p>
+                            <strong>Resultado:</strong>{' '}
+                            {estudio.resultado || 'Pendiente'}
+                          </p>
+
+                          <p>
+                            <strong>Fecha:</strong>{' '}
+                            {formatearFecha(estudio.fecha || estudio.fechaSolicitud)}
+                          </p>
+
+                          <p>
+                            <strong>Clínica/Laboratorio:</strong>{' '}
+                            {clinica?.nombre ||
+                              estudio.clinicaLaboratorio ||
+                              'Clínica no encontrada'}
+                          </p>
+
+                          {estudio.hospital && (
+                            <p>
+                              <strong>Hospital:</strong> {estudio.hospital}
+                            </p>
+                          )}
+
+                          {estudio.fechaProgramada && (
+                            <p>
+                              <strong>Fecha programada:</strong>{' '}
+                              {formatearFecha(estudio.fechaProgramada)}
+                            </p>
+                          )}
+
+                          {estudio.indicaciones && (
+                            <p>
+                              <strong>Indicaciones:</strong>{' '}
+                              {estudio.indicaciones}
+                            </p>
+                          )}
+                        </div>
                       )}
 
-                      {estudio.fechaProgramada && (
-                        <p>Fecha programada: {formatearFecha(estudio.fechaProgramada)}</p>
+                      {estudioEditandoId === estudio.id && (
+                        <div className="formulario-editar-resultado">
+                          <h4>Editar resultado del estudio</h4>
+
+                          <label>Resultado</label>
+                          <textarea
+                            value={resultadoEditado}
+                            onChange={(e) => setResultadoEditado(e.target.value)}
+                            placeholder="Escribe el resultado del estudio"
+                            rows="4"
+                          />
+
+                          <div className="acciones-editar-resultado">
+                            <button
+                              type="button"
+                              className="btn-guardar-resultado"
+                              onClick={() => guardarResultadoEstudio(estudio.id)}
+                            >
+                              Guardar cambios
+                            </button>
+
+                            <button
+                              type="button"
+                              className="btn-cancelar-resultado"
+                              onClick={() => {
+                                setEstudioEditandoId(null)
+                                setResultadoEditado('')
+                              }}
+                            >
+                              Cancelar
+                            </button>
+                          </div>
+                        </div>
                       )}
 
-                      {estudio.indicaciones && (
-                        <p>Indicaciones: {estudio.indicaciones}</p>
-                      )}
                     </div>
                   )
                 })}
@@ -377,6 +778,8 @@ function PerfilMedico({ paciente, onBack, onCerrarSesion }) {
         <FormularioAtencion
           pacienteId={paciente.id}
           medicoId={usuario?.medicoId}
+          medicos={medicos}
+          clinicas={clinicas}
           consultaEditar={consultaEditar}
           onCerrar={() => {
             setMostrarFormulario(false)

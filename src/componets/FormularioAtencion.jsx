@@ -10,16 +10,20 @@ import {
 } from "lucide-react";
 import "./FormularioAtencion.css";
 
-const API_URL = "https://localhost:7121/v1";
+//const API_URL = "https://localhost:7121/v1";
+const API_URL = 'https://d35t58c2fgfu9s.cloudfront.net/v1'
 
 
 export default function FormularioAtencion({
   pacienteId,
   medicoId,
+  medicos = [],
+  clinicas = [],
   onCerrar,
   onGuardado,
   consultaEditar,
 }) {
+
   const [guardando, setGuardando] = useState(false);
 
   const [consulta, setConsulta] = useState({
@@ -30,23 +34,42 @@ export default function FormularioAtencion({
     clinicaId: "",
   });
 
-  const [receta, setReceta] = useState({
-    medicamento: "",
-    dosis: "",
-    duracion: "",
-    indicaciones: "",
-  });
+  const [recetas, setRecetas] = useState([
+  {
+      medicamento: "",
+      dosis: "",
+      duracion: "",
+      indicaciones: "",
+    },
+  ])
+  const [recetasEliminadas, setRecetasEliminadas] = useState([])
 
-  const [estudio, setEstudio] = useState({
-    tipo: "",
-    clinicaLaboratorio: "",
-    hospital: "",
-    fechaProgramada: "",
-    indicaciones: "",
-  });
+  const [estudios, setEstudios] = useState([
+    {
+      id: "",
+      tipo: "",
+      clinicaLaboratorio: "",
+      hospital: "",
+      fechaProgramada: "",
+      indicaciones: "",
+    },
+  ])
+
+  const medicoActual = medicos.find(
+    (medico) => String(medico.id) === String(medicoId)
+  )
+
+  const clinicaActual = clinicas.find(
+    (clinica) => String(clinica.id) === String(medicoActual?.clinicaId)
+  )
+
+  const clinicaIdFinal = consultaEditar
+    ? consulta.clinicaId
+    : medicoActual?.clinicaId
 
   useEffect(() => {
     if (consultaEditar) {
+      setRecetasEliminadas([])
       setConsulta({
         fecha: consultaEditar.fecha
           ? consultaEditar.fecha.split("T")[0]
@@ -55,30 +78,106 @@ export default function FormularioAtencion({
         diagnostico: consultaEditar.diagnostico || "",
         observaciones: consultaEditar.observaciones || "",
         clinicaId: consultaEditar.clinicaId || "",
-      });
+      })
+
+     if (consultaEditar.recetas && consultaEditar.recetas.length > 0) {
+       setRecetas(
+         consultaEditar.recetas.map((receta) => ({
+           id: receta.id || "",
+           medicamento: receta.medicamento || "",
+           dosis: receta.dosis || "",
+           duracion: receta.duracion || "",
+           indicaciones: receta.indicaciones || "",
+         }))
+       )
+     } else {
+       setRecetas([
+         {
+           id: "",
+           medicamento: "",
+           dosis: "",
+           duracion: "",
+           indicaciones: "",
+         },
+       ])
+     }
+     }
+  }, [consultaEditar])
+
+  const cambiarReceta = (index, campo, valor) => {
+    const nuevasRecetas = [...recetas]
+
+    nuevasRecetas[index] = {
+      ...nuevasRecetas[index],
+      [campo]: valor,
     }
-  }, [consultaEditar]);
+
+    setRecetas(nuevasRecetas)
+  }
+
+  const agregarMedicamento = () => {
+    setRecetas([
+      ...recetas,
+      {
+        id: "",
+        medicamento: "",
+        dosis: "",
+        duracion: "",
+        indicaciones: "",
+      },
+    ])
+  }
+
+  const eliminarMedicamento = (index) => {
+    const recetaEliminada = recetas[index]
+
+    if (recetaEliminada.id) {
+      setRecetasEliminadas([
+        ...recetasEliminadas,
+        recetaEliminada.id,
+      ])
+    }
+
+    const nuevasRecetas = recetas.filter((_, i) => i !== index)
+    setRecetas(nuevasRecetas)
+  }
 
   const manejarConsulta = (e) => {
-    setConsulta({
-      ...consulta,
-      [e.target.name]: e.target.value,
-    });
-  };
+      setConsulta({
+        ...consulta,
+        [e.target.name]: e.target.value,
+      });
+    };
 
-  const manejarReceta = (e) => {
-    setReceta({
-      ...receta,
-      [e.target.name]: e.target.value,
-    });
-  };
+    const cambiarEstudio = (index, campo, valor) => {
+    const nuevosEstudios = [...estudios]
 
-  const manejarEstudio = (e) => {
-    setEstudio({
-      ...estudio,
-      [e.target.name]: e.target.value,
-    });
-  };
+    nuevosEstudios[index] = {
+      ...nuevosEstudios[index],
+      [campo]: valor,
+    }
+
+    setEstudios(nuevosEstudios)
+  }
+
+  const agregarEstudio = () => {
+    setEstudios([
+      ...estudios,
+      {
+        id: "",
+        tipo: "",
+        clinicaLaboratorio: "",
+        hospital: "",
+        fechaProgramada: "",
+        indicaciones: "",
+      },
+    ])
+  }
+
+  const eliminarEstudio = (index) => {
+    const nuevosEstudios = estudios.filter((_, i) => i !== index)
+    setEstudios(nuevosEstudios)
+  }
 
   const guardarAtencion = async (e) => {
     e.preventDefault();
@@ -102,7 +201,7 @@ export default function FormularioAtencion({
         observaciones: consulta.observaciones,
         pacienteId: pacienteId,
         medicoId: medicoId,
-        clinicaId: consulta.clinicaId ? Number(consulta.clinicaId) : 1,
+        clinicaId: Number(clinicaIdFinal),
       };
 
       console.log("Consulta enviada:", consultaPayload);
@@ -110,6 +209,7 @@ export default function FormularioAtencion({
       let consultaId = null;
 
       if (consultaEditar) {
+        // 1. Actualizar consulta
         const respuestaConsulta = await fetch(
           `${API_URL}/Consultas/${consultaEditar.id}`,
           {
@@ -117,23 +217,77 @@ export default function FormularioAtencion({
             headers: headers,
             body: JSON.stringify(consultaPayload),
           }
-        );
+        )
 
         if (!respuestaConsulta.ok) {
-          const errorTexto = await respuestaConsulta.text();
-          console.log("Error al actualizar consulta:", errorTexto);
-          throw new Error("No se pudo actualizar la consulta");
+          const errorTexto = await respuestaConsulta.text()
+          console.log("Error al actualizar consulta:", errorTexto)
+          throw new Error("No se pudo actualizar la consulta")
         }
 
-        alert("Consulta actualizada correctamente");
+        // 2. Eliminar recetas quitadas del formulario
+        for (const recetaId of recetasEliminadas) {
+          const respuestaEliminar = await fetch(`${API_URL}/Recetas/${recetaId}`, {
+            method: "DELETE",
+            headers: headers,
+          })
+
+          if (!respuestaEliminar.ok) {
+            const errorTexto = await respuestaEliminar.text()
+            console.log("Error al eliminar receta:", errorTexto)
+            throw new Error("No se pudo eliminar una receta")
+          }
+        }
+
+        // 3. Actualizar o agregar recetas
+        for (const receta of recetas) {
+          if (receta.medicamento.trim() !== "") {
+            const recetaPayload = {
+              medicamento: receta.medicamento,
+              dosis: receta.dosis,
+              duracion: receta.duracion,
+              indicaciones: receta.indicaciones,
+              consultaId: consultaEditar.id,
+            }
+
+            if (receta.id) {
+              const respuestaReceta = await fetch(`${API_URL}/Recetas/${receta.id}`, {
+                method: "PATCH",
+                headers: headers,
+                body: JSON.stringify(recetaPayload),
+              })
+
+              if (!respuestaReceta.ok) {
+                const errorTexto = await respuestaReceta.text()
+                console.log("Error al actualizar receta:", errorTexto)
+                throw new Error("No se pudo actualizar la receta")
+              }
+            } else {
+              const respuestaReceta = await fetch(`${API_URL}/Recetas`, {
+                method: "POST",
+                headers: headers,
+                body: JSON.stringify(recetaPayload),
+              })
+
+              if (!respuestaReceta.ok) {
+                const errorTexto = await respuestaReceta.text()
+                console.log("Error al agregar receta:", errorTexto)
+                throw new Error("No se pudo agregar una receta nueva")
+                alert("Error al agregar receta")
+              }
+            }
+          }
+        }
+
+        
 
         if (onGuardado) {
-          onGuardado();
+          onGuardado()
         } else {
-          onCerrar();
+          onCerrar()
         }
 
-        return;
+        return
       }
 
       const respuestaConsulta = await fetch(`${API_URL}/Consultas`, {
@@ -153,32 +307,35 @@ export default function FormularioAtencion({
 
       consultaId = consultaCreada.id || consultaCreada.Id;
 
-      if (receta.medicamento.trim() !== "") {
-        const recetaPayload = {
-          medicamento: receta.medicamento,
-          dosis: receta.dosis,
-          duracion: receta.duracion,
-          indicaciones: receta.indicaciones,
-          consultaId: consultaId,
-        };
+      for (const receta of recetas) {
+        if (receta.medicamento.trim() !== "") {
+          const recetaPayload = {
+            medicamento: receta.medicamento,
+            dosis: receta.dosis,
+            duracion: receta.duracion,
+            indicaciones: receta.indicaciones,
+            consultaId: consultaId,
+          }
 
-        console.log("Receta enviada:", recetaPayload);
+          console.log("Receta enviada:", recetaPayload)
 
-        const respuestaReceta = await fetch(`${API_URL}/Recetas`, {
-          method: "POST",
-          headers: headers,
-          body: JSON.stringify(recetaPayload),
-        });
+          const respuestaReceta = await fetch(`${API_URL}/Recetas`, {
+            method: "POST",
+            headers: headers,
+            body: JSON.stringify(recetaPayload),
+          })
 
-        if (!respuestaReceta.ok) {
-          const errorTexto = await respuestaReceta.text();
-          console.log("Error al guardar receta:", errorTexto);
-          throw new Error(
-            "La consulta se guardó, pero no se pudo guardar la receta"
-          );
+          if (!respuestaReceta.ok) {
+            const errorTexto = await respuestaReceta.text()
+            console.log("Error al guardar receta:", errorTexto)
+            throw new Error(
+              "La consulta se guardó, pero no se pudo guardar una receta"
+            )
+          }
         }
       }
 
+      for (const estudio of estudios) {
       if (estudio.tipo.trim() !== "") {
         const estudioPayload = {
           tipo: estudio.tipo,
@@ -187,27 +344,28 @@ export default function FormularioAtencion({
             ? new Date(estudio.fechaProgramada).toISOString()
             : new Date().toISOString(),
           pacienteId: pacienteId,
-          clinicaId: consulta.clinicaId ? Number(consulta.clinicaId) : 1,
-        };
+          clinicaId: Number(clinicaIdFinal),
+        }
 
-        console.log("Estudio enviado:", estudioPayload);
+        console.log("Estudio enviado:", estudioPayload)
 
         const respuestaEstudio = await fetch(`${API_URL}/Estudios`, {
           method: "POST",
           headers: headers,
           body: JSON.stringify(estudioPayload),
-        });
+        })
 
         if (!respuestaEstudio.ok) {
-          const errorTexto = await respuestaEstudio.text();
-          console.log("Error al guardar estudio:", errorTexto);
+          const errorTexto = await respuestaEstudio.text()
+          console.log("Error al guardar estudio:", errorTexto)
           throw new Error(
-            "La consulta se guardó, pero no se pudo guardar el estudio"
-          );
+            "La consulta se guardó, pero no se pudo guardar un estudio"
+          )
         }
       }
+    }
 
-      alert("Atención médica registrada correctamente");
+      
 
       if (onGuardado) {
         onGuardado();
@@ -231,7 +389,7 @@ export default function FormularioAtencion({
               {consultaEditar
                 ? "Actualizar atención médica"
                 : "Registrar nueva atención"}
-            </h2>
+            </h2>   
             <p>
               {consultaEditar
                 ? "Corrige los datos de la consulta médica seleccionada."
@@ -269,14 +427,12 @@ export default function FormularioAtencion({
               <div className="campo">
                 <label>
                   <Building2 size={16} />
-                  ID Clínica / Hospital
+                  Clínica / Hospital
                 </label>
                 <input
-                  type="number"
-                  name="clinicaId"
-                  value={consulta.clinicaId}
-                  onChange={manejarConsulta}
-                  placeholder="Ejemplo: 1"
+                  type="text"
+                  value={clinicaActual?.nombre || 'Clínica no encontrada'}
+                  disabled
                 />
               </div>
             </div>
@@ -314,128 +470,191 @@ export default function FormularioAtencion({
             </div>
           </section>
 
-          {!consultaEditar && (
+          
             <>
-              <section className="seccion-form">
-                <h3>
-                  <Pill size={20} />
-                  Receta médica
-                </h3>
+             <section className="seccion-form">
+              <h3>
+                <Pill size={20} />
+                Receta médica
+              </h3>
 
-                <div className="grid-form">
-                  <div className="campo">
-                    <label>Medicamento</label>
-                    <input
-                      type="text"
-                      name="medicamento"
-                      value={receta.medicamento}
-                      onChange={manejarReceta}
-                      placeholder="Ejemplo: Paracetamol"
-                    />
+              {recetas.map((receta, index) => (
+                <div key={index} className="receta-item">
+                  <div className="titulo-receta-item">
+                    <h4>Medicamento {index + 1}</h4>
+
+                    {recetas.length > 1 && (
+                      <button
+                        type="button"
+                        className="btn-eliminar-medicamento"
+                        onClick={() => eliminarMedicamento(index)}
+                      >
+                        Eliminar
+                      </button>
+                    )}
                   </div>
 
-                  <div className="campo">
-                    <label>Dosis</label>
-                    <input
-                      type="text"
-                      name="dosis"
-                      value={receta.dosis}
-                      onChange={manejarReceta}
-                      placeholder="Ejemplo: 500 mg"
-                    />
-                  </div>
-                </div>
+                  <div className="grid-form">
+                    <div className="campo">
+                      <label>Medicamento</label>
+                      <input
+                        type="text"
+                        value={receta.medicamento}
+                        onChange={(e) =>
+                          cambiarReceta(index, "medicamento", e.target.value)
+                        }
+                        placeholder="Ejemplo: Paracetamol"
+                      />
+                    </div>
 
-                <div className="grid-form">
-                  <div className="campo">
-                    <label>Duración</label>
-                    <input
-                      type="text"
-                      name="duracion"
-                      value={receta.duracion}
-                      onChange={manejarReceta}
-                      placeholder="Ejemplo: 5 días"
-                    />
-                  </div>
-
-                  <div className="campo">
-                    <label>Indicaciones</label>
-                    <input
-                      type="text"
-                      name="indicaciones"
-                      value={receta.indicaciones}
-                      onChange={manejarReceta}
-                      placeholder="Ejemplo: Cada 8 horas después de comer"
-                    />
-                  </div>
-                </div>
-              </section>
-
-              <section className="seccion-form">
-                <h3>
-                  <FlaskConical size={20} />
-                  Estudios solicitados
-                </h3>
-
-                <div className="grid-form">
-                  <div className="campo">
-                    <label>Tipo de estudio</label>
-                    <input
-                      type="text"
-                      name="tipo"
-                      value={estudio.tipo}
-                      onChange={manejarEstudio}
-                      placeholder="Ejemplo: Biometría hemática"
-                    />
+                    <div className="campo">
+                      <label>Dosis</label>
+                      <input
+                        type="text"
+                        value={receta.dosis}
+                        onChange={(e) =>
+                          cambiarReceta(index, "dosis", e.target.value)
+                        }
+                        placeholder="Ejemplo: 500 mg"
+                      />
+                    </div>
                   </div>
 
-                  <div className="campo">
-                    <label>Fecha programada</label>
-                    <input
-                      type="date"
-                      name="fechaProgramada"
-                      value={estudio.fechaProgramada}
-                      onChange={manejarEstudio}
-                    />
+                  <div className="grid-form">
+                    <div className="campo">
+                      <label>Duración</label>
+                      <input
+                        type="text"
+                        value={receta.duracion}
+                        onChange={(e) =>
+                          cambiarReceta(index, "duracion", e.target.value)
+                        }
+                        placeholder="Ejemplo: 5 días"
+                      />
+                    </div>
+
+                    <div className="campo">
+                      <label>Indicaciones</label>
+                      <input
+                        type="text"
+                        value={receta.indicaciones}
+                        onChange={(e) =>
+                          cambiarReceta(index, "indicaciones", e.target.value)
+                        }
+                        placeholder="Ejemplo: Cada 8 horas después de comer"
+                      />
+                    </div>
                   </div>
                 </div>
+              ))}
 
-                <div className="grid-form">
-                  <div className="campo">
-                    <label>Clínica / Laboratorio</label>
-                    <input
-                      type="text"
-                      name="clinicaLaboratorio"
-                      value={estudio.clinicaLaboratorio}
-                      onChange={manejarEstudio}
-                      placeholder="Ejemplo: Laboratorio Santa María"
-                    />
-                  </div>
+              <button
+                type="button"
+                className="btn-agregar-medicamento"
+                onClick={agregarMedicamento}
+              >
+                + Agregar otro medicamento
+              </button>
+            </section>
+       
+              {!consultaEditar && (
+                <section className="seccion-form">
+                  <h3>
+                    <FlaskConical size={20} />
+                    Estudios solicitados
+                  </h3>
 
-                  <div className="campo">
-                    <label>Hospital</label>
-                    <input
-                      type="text"
-                      name="hospital"
-                      value={estudio.hospital}
-                      onChange={manejarEstudio}
-                      placeholder="Ejemplo: Hospital General"
-                    />
-                  </div>
-                </div>
+                  {estudios.map((estudio, index) => (
+                    <div key={index} className="receta-item">
+                      <div className="titulo-receta-item">
+                        <h4>Estudio {index + 1}</h4>
 
-                <div className="campo">
-                  <label>Indicaciones del estudio</label>
-                  <textarea
-                    name="indicaciones"
-                    value={estudio.indicaciones}
-                    onChange={manejarEstudio}
-                    placeholder="Ejemplo: Presentarse en ayunas..."
-                  />
-                </div>
-              </section>
+                        {estudios.length > 1 && (
+                          <button
+                            type="button"
+                            className="btn-eliminar-medicamento"
+                            onClick={() => eliminarEstudio(index)}
+                          >
+                            Eliminar
+                          </button>
+                        )}
+                      </div>
+
+                      <div className="grid-form">
+                        <div className="campo">
+                          <label>Tipo de estudio</label>
+                          <input
+                            type="text"
+                            value={estudio.tipo}
+                            onChange={(e) =>
+                              cambiarEstudio(index, "tipo", e.target.value)
+                            }
+                            placeholder="Ejemplo: Biometría hemática"
+                          />
+                        </div>
+
+                        <div className="campo">
+                          <label>Fecha programada</label>
+                          <input
+                            type="date"
+                            value={estudio.fechaProgramada}
+                            onChange={(e) =>
+                              cambiarEstudio(index, "fechaProgramada", e.target.value)
+                            }
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid-form">
+                        <div className="campo">
+                          <label>Clínica / Laboratorio</label>
+                          <input
+                            type="text"
+                            value={estudio.clinicaLaboratorio}
+                            onChange={(e) =>
+                              cambiarEstudio(index, "clinicaLaboratorio", e.target.value)
+                            }
+                            placeholder="Ejemplo: Laboratorio Santa María"
+                          />
+                        </div>
+
+                        <div className="campo">
+                          <label>Hospital</label>
+                          <input
+                            type="text"
+                            value={estudio.hospital}
+                            onChange={(e) =>
+                              cambiarEstudio(index, "hospital", e.target.value)
+                            }
+                            placeholder="Ejemplo: Hospital General"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="campo">
+                        <label>Indicaciones del estudio</label>
+                        <textarea
+                          value={estudio.indicaciones}
+                          onChange={(e) =>
+                            cambiarEstudio(index, "indicaciones", e.target.value)
+                          }
+                          placeholder="Ejemplo: Presentarse en ayunas..."
+                        />
+                      </div>
+                    </div>
+                  ))}
+
+                  <button
+                    type="button"
+                    className="btn-agregar-medicamento"
+                    onClick={agregarEstudio}
+                  >
+                    + Agregar otro estudio
+                  </button>
+                </section>
+              )}
             </>
-          )}
+          
 
           <div className="acciones-form">
             <button type="button" className="btn-cancelar" onClick={onCerrar}>
