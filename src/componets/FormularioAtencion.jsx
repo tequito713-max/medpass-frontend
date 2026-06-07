@@ -10,8 +10,8 @@ import {
 } from "lucide-react";
 import "./FormularioAtencion.css";
 
-const API_URL = "https://localhost:7121/v1";
-//const API_URL = 'https://d35t58c2fgfu9s.cloudfront.net/v1'
+//const API_URL = "https://localhost:7121/v1";
+const API_URL = 'https://d35t58c2fgfu9s.cloudfront.net/v1'
 
 
 export default function FormularioAtencion({
