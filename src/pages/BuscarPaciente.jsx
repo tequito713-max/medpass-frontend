@@ -18,12 +18,19 @@ function BuscarPaciente({ usuario, onSeleccionarPaciente, onRegistrarPaciente, o
   const [busqueda, setBusqueda] = useState('')
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState('')
+  const esUsuarioPaciente = usuario?.rol === 'Paciente'
 
   useEffect(() => {
     cargarPacientes()
   }, [])
 
   async function cargarPacientes() {
+    if (esUsuarioPaciente) {
+      setPacientes([])
+      setCargando(false)
+      return
+    }
+
     try {
       setCargando(true)
       setError('')
@@ -147,7 +154,7 @@ function BuscarPaciente({ usuario, onSeleccionarPaciente, onRegistrarPaciente, o
 
               <button
                 className="primary-outline-button"
-                onClick={() => onSeleccionarPaciente(paciente)}
+                onClick={() => !esUsuarioPaciente && onSeleccionarPaciente(paciente)}
               >
                 <FileText size={18} />
                 Ver historial
@@ -159,12 +166,14 @@ function BuscarPaciente({ usuario, onSeleccionarPaciente, onRegistrarPaciente, o
             <div className="estado-box full-width">
               <p>No se encontraron pacientes con esa búsqueda.</p>
 
-              <button
-                className="btn-registrar"
-                onClick={onRegistrarPaciente}
-              >
-                Registrar nuevo paciente
-              </button>
+              {!esUsuarioPaciente && (
+                <button
+                  className="btn-registrar"
+                  onClick={onRegistrarPaciente}
+                >
+                  Registrar nuevo paciente
+                </button>
+              )}
             </div>
           )}
         </section>

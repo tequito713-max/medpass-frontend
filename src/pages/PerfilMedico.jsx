@@ -270,10 +270,12 @@ function PerfilMedico({ paciente, onBack, onCerrarSesion }) {
         </div>
 
         <div className="topbar-actions">
-          <button className="logout-button secondary" onClick={onBack}>
-            <ArrowLeft size={18} />
-            Volver
-          </button>
+          {usuario?.rol !== 'Paciente' && (
+            <button className="logout-button secondary" onClick={onBack}>
+              <ArrowLeft size={18} />
+              Volver
+            </button>
+          )}
 
           <button className="logout-button" onClick={onCerrarSesion}>
             <LogOut size={18} />

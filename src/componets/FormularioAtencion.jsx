@@ -10,8 +10,8 @@ import {
 } from "lucide-react";
 import "./FormularioAtencion.css";
 
-//const API_URL = "https://localhost:7121/v1";
-const API_URL = 'https://d35t58c2fgfu9s.cloudfront.net/v1'
+const API_URL = "https://localhost:7121/v1";
+//const API_URL = 'https://d35t58c2fgfu9s.cloudfront.net/v1'
 
 
 export default function FormularioAtencion({
@@ -30,7 +30,6 @@ export default function FormularioAtencion({
     fecha: new Date().toISOString().split("T")[0],
     motivo: "",
     diagnostico: "",
-    observaciones: "",
     clinicaId: "",
   });
 
@@ -39,7 +38,6 @@ export default function FormularioAtencion({
       medicamento: "",
       dosis: "",
       duracion: "",
-      indicaciones: "",
     },
   ])
   const [recetasEliminadas, setRecetasEliminadas] = useState([])
@@ -48,10 +46,7 @@ export default function FormularioAtencion({
     {
       id: "",
       tipo: "",
-      clinicaLaboratorio: "",
-      hospital: "",
       fechaProgramada: "",
-      indicaciones: "",
     },
   ])
 
@@ -76,7 +71,6 @@ export default function FormularioAtencion({
           : new Date().toISOString().split("T")[0],
         motivo: consultaEditar.motivo || "",
         diagnostico: consultaEditar.diagnostico || "",
-        observaciones: consultaEditar.observaciones || "",
         clinicaId: consultaEditar.clinicaId || "",
       })
 
@@ -87,7 +81,6 @@ export default function FormularioAtencion({
            medicamento: receta.medicamento || "",
            dosis: receta.dosis || "",
            duracion: receta.duracion || "",
-           indicaciones: receta.indicaciones || "",
          }))
        )
      } else {
@@ -97,7 +90,6 @@ export default function FormularioAtencion({
            medicamento: "",
            dosis: "",
            duracion: "",
-           indicaciones: "",
          },
        ])
      }
@@ -123,7 +115,6 @@ export default function FormularioAtencion({
         medicamento: "",
         dosis: "",
         duracion: "",
-        indicaciones: "",
       },
     ])
   }
@@ -166,10 +157,7 @@ export default function FormularioAtencion({
       {
         id: "",
         tipo: "",
-        clinicaLaboratorio: "",
-        hospital: "",
         fechaProgramada: "",
-        indicaciones: "",
       },
     ])
   }
@@ -198,7 +186,7 @@ export default function FormularioAtencion({
           : new Date().toISOString(),
         motivo: consulta.motivo,
         diagnostico: consulta.diagnostico,
-        observaciones: consulta.observaciones,
+        observaciones: "",
         pacienteId: pacienteId,
         medicoId: medicoId,
         clinicaId: Number(clinicaIdFinal),
@@ -225,7 +213,7 @@ export default function FormularioAtencion({
           throw new Error("No se pudo actualizar la consulta")
         }
 
-        // 2. Eliminar recetas quitadas del formulario
+        // 2. Eliminar recetas 
         for (const recetaId of recetasEliminadas) {
           const respuestaEliminar = await fetch(`${API_URL}/Recetas/${recetaId}`, {
             method: "DELETE",
@@ -246,7 +234,6 @@ export default function FormularioAtencion({
               medicamento: receta.medicamento,
               dosis: receta.dosis,
               duracion: receta.duracion,
-              indicaciones: receta.indicaciones,
               consultaId: consultaEditar.id,
             }
 
@@ -313,7 +300,7 @@ export default function FormularioAtencion({
             medicamento: receta.medicamento,
             dosis: receta.dosis,
             duracion: receta.duracion,
-            indicaciones: receta.indicaciones,
+            indicaciones: "",
             consultaId: consultaId,
           }
 
@@ -458,16 +445,6 @@ export default function FormularioAtencion({
                 required
               />
             </div>
-
-            <div className="campo">
-              <label>Observaciones</label>
-              <textarea
-                name="observaciones"
-                value={consulta.observaciones}
-                onChange={manejarConsulta}
-                placeholder="Indicaciones generales o notas del doctor..."
-              />
-            </div>
           </section>
 
           
@@ -532,18 +509,6 @@ export default function FormularioAtencion({
                         placeholder="Ejemplo: 5 días"
                       />
                     </div>
-
-                    <div className="campo">
-                      <label>Indicaciones</label>
-                      <input
-                        type="text"
-                        value={receta.indicaciones}
-                        onChange={(e) =>
-                          cambiarReceta(index, "indicaciones", e.target.value)
-                        }
-                        placeholder="Ejemplo: Cada 8 horas después de comer"
-                      />
-                    </div>
                   </div>
                 </div>
               ))}
@@ -603,43 +568,6 @@ export default function FormularioAtencion({
                             }
                           />
                         </div>
-                      </div>
-
-                      <div className="grid-form">
-                        <div className="campo">
-                          <label>Clínica / Laboratorio</label>
-                          <input
-                            type="text"
-                            value={estudio.clinicaLaboratorio}
-                            onChange={(e) =>
-                              cambiarEstudio(index, "clinicaLaboratorio", e.target.value)
-                            }
-                            placeholder="Ejemplo: Laboratorio Santa María"
-                          />
-                        </div>
-
-                        <div className="campo">
-                          <label>Hospital</label>
-                          <input
-                            type="text"
-                            value={estudio.hospital}
-                            onChange={(e) =>
-                              cambiarEstudio(index, "hospital", e.target.value)
-                            }
-                            placeholder="Ejemplo: Hospital General"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="campo">
-                        <label>Indicaciones del estudio</label>
-                        <textarea
-                          value={estudio.indicaciones}
-                          onChange={(e) =>
-                            cambiarEstudio(index, "indicaciones", e.target.value)
-                          }
-                          placeholder="Ejemplo: Presentarse en ayunas..."
-                        />
                       </div>
                     </div>
                   ))}

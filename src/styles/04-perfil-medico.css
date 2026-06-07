@@ -1,0 +1,260 @@
+/* PERFIL MEDICO */
+
+.profile-header {
+  max-width: 1180px;
+  margin: 0 auto 22px;
+  background: linear-gradient(135deg, #2563eb, #0f766e);
+  border-radius: 30px;
+  padding: 36px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  color: white;
+  box-shadow: var(--shadow);
+}
+
+.user-avatar {
+  width: 104px;
+  height: 104px;
+  border-radius: 30px;
+  background: rgba(255, 255, 255, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-header h1 {
+  font-size: 42px;
+  margin-bottom: 8px;
+}
+
+.profile-header p {
+  color: #dbeafe;
+}
+
+.summary-cards {
+  max-width: 1180px;
+  margin: 0 auto 22px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.mini-card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
+}
+
+.mini-card svg {
+  color: var(--primary);
+}
+
+.mini-card strong {
+  font-size: 30px;
+}
+
+.mini-card span {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.content-grid {
+  max-width: 1180px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 20px;
+}
+
+.card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
+}
+
+.card-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.card-title svg {
+  color: var(--primary);
+}
+
+.card-title h3 {
+  font-size: 20px;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.info-item {
+  background: #f8fbff;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.info-icon {
+  width: 40px;
+  height: 40px;
+  background: #eff6ff;
+  color: var(--primary);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.info-item span {
+  display: block;
+  color: var(--muted);
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.info-item strong {
+  font-size: 15px;
+  color: var(--text);
+}
+
+.vertical-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.medical-row {
+  display: flex;
+  gap: 14px;
+  background: #f8fbff;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 16px;
+}
+
+.medical-icon {
+  min-width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: #eff6ff;
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.medical-icon.danger {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.medical-row span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.medical-row strong {
+  display: block;
+  margin: 4px 0;
+}
+
+.medical-row p {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.wide-card {
+  grid-column: 1 / -1;
+}
+
+.timeline-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.timeline-item {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 16px;
+  background: #f8fbff;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 18px;
+}
+
+.timeline-date {
+  color: var(--primary-dark);
+  font-weight: 800;
+}
+
+.timeline-content h4 {
+  font-size: 17px;
+  margin-bottom: 6px;
+}
+
+.timeline-content p {
+  color: #334155;
+  margin-bottom: 12px;
+}
+
+.timeline-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.timeline-meta span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: white;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  padding: 8px 10px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.simple-record {
+  background: #f8fbff;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 16px;
+}
+
+.simple-record strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.simple-record span,
+.simple-record p {
+  display: block;
+  color: var(--muted);
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.empty-text {
+  color: var(--muted);
+  font-weight: 700;
+}
